@@ -1,0 +1,16 @@
+{
+  "ImageId": "ami-066c4849e6b3a1e3d",
+  "InstanceType": "t3.micro",
+  "IamInstanceProfile": {
+    "Name": "healthscale-ec2-profile"
+  },
+  "NetworkInterfaces": [
+    {
+      "DeviceIndex": 0,
+      "AssociatePublicIpAddress": true,
+      "Groups": [
+        "sg-0ef50be45d11787e9"
+      ]
+    }
+  ]
+}
