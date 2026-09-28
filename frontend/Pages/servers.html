@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+>
+
+<meta
+name="description"
+content="HealthScale EC2 Server Monitoring"
+
+>
+
+<title>HealthScale | Servers</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/responsive.css">
+
+
+</head>
+
+<body>
+
+<div class="app-container">
+
+
+<!-- =====================================================
+     SIDEBAR
+====================================================== -->
+
+<aside class="sidebar">
+
+```
+<div class="brand">
+
+    <div class="brand-logo">
+        H
+    </div>
+
+    <div>
+
+        <h2>HealthScale</h2>
+
+        <span>
+            Cloud Monitoring
+        </span>
+
+    </div>
+
+</div>
+
+
+<nav class="sidebar-nav">
+
+
+    <!-- =================================================
+         MAIN
+    ================================================== -->
+
+    <p class="nav-title">
+        MAIN
+    </p>
+
+
+    <!-- DASHBOARD -->
+
+    <a
+        href="../dashboard.html"
+        class="nav-item"
+    >
+
+        <span>▣</span>
+
+        Dashboard
+
+    </a>
+
+
+    <!-- SERVERS -->
+
+    <a
+        href="servers.html"
+        class="nav-item active"
+    >
+
+        <span>▤</span>
+
+        Servers
+
+    </a>
+
+
+    <!-- PATIENTS -->
+
+    <a
+        href="patients.html"
+        class="nav-item"
+    >
+
+        <span>♙</span>
+
+        Patients
+
+    </a>
+
+
+    <!-- METRICS -->
+
+    <a
+        href="metrics.html"
+        class="nav-item"
+    >
+
+        <span>◉</span>
+
+        Metrics
+
+    </a>
+
+
+    <!-- AUTO SCALING -->
+
+    <a
+        href="autoscaling.html"
+        class="nav-item"
+    >
+
+        <span>↗</span>
+
+        Auto Scaling
+
+    </a>
+
+
+    <!-- =================================================
+         MONITORING
+    ================================================== -->
+
+    <p class="nav-title">
+        MONITORING
+    </p>
+
+
+    <!-- ALERTS -->
+
+    <a
+        href="alerts.html"
+        class="nav-item"
+    >
+
+        <span>⚠</span>
+
+        Alerts
+
+        <span
+            class="notification-count"
+            id="notificationCount"
+        >
+            0
+        </span>
+
+    </a>
+
+
+    <!-- ACTIVITY -->
+
+    <a
+        href="activity.html"
+        class="nav-item"
+    >
+
+        <span>◷</span>
+
+        Activity
+
+    </a>
+
+
+    <!-- =================================================
+         SYSTEM
+    ================================================== -->
+
+    <p class="nav-title">
+        SYSTEM
+    </p>
+
+
+    <!-- SETTINGS -->
+
+    <a
+        href="settings.html"
+        class="nav-item"
+    >
+
+        <span>⚙</span>
+
+        Settings
+
+    </a>
+
+
+</nav>
+
+
+<div class="sidebar-footer">
+
+    <div class="aws-region">
+
+        <span class="status-dot"></span>
+
+        <div>
+
+            <strong>
+                AWS Mumbai
+            </strong>
+
+            <small>
+                ap-south-1
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</aside>
+
+<!-- =====================================================
+     MAIN CONTENT
+====================================================== -->
+
+<main class="main-content">
+
+```
+<!-- TOP BAR -->
+
+<header class="topbar">
+
+
+    <div>
+
+        <h1>
+            EC2 Servers
+        </h1>
+
+        <p>
+            Monitor your AWS EC2 infrastructure
+        </p>
+
+    </div>
+
+
+    <div class="topbar-actions">
+
+
+        <div class="system-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                System Operational
+            </span>
+
+        </div>
+
+
+        <button
+            class="refresh-btn"
+            type="button"
+            onclick="loadServers()"
+        >
+
+            ↻ Refresh
+
+        </button>
+
+
+        <div class="user-profile">
+
+            <div class="avatar">
+                A
+            </div>
+
+            <div>
+
+                <strong>
+                    Admin
+                </strong>
+
+                <small>
+                    Administrator
+                </small>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</header>
+
+
+<!-- =====================================================
+     PAGE CONTENT
+====================================================== -->
+
+<section class="dashboard-content">
+
+
+    <!-- SERVER SUMMARY -->
+
+    <div class="metric-grid">
+
+
+        <div class="metric-card">
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ◈
+                </span>
+
+                <span class="metric-label">
+                    TOTAL SERVERS
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="serverCount"
+            >
+                0
+            </div>
+
+
+            <div class="metric-footer positive">
+
+                ● Auto Scaling managed
+
+            </div>
+
+        </div>
+
+
+
+        <div class="metric-card">
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ✓
+                </span>
+
+                <span class="metric-label">
+                    HEALTHY SERVERS
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="healthyServerCount"
+            >
+                0
+            </div>
+
+
+            <div class="metric-footer positive">
+
+                ● AWS health status
+
+            </div>
+
+        </div>
+
+
+
+        <div class="metric-card">
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ↗
+                </span>
+
+                <span class="metric-label">
+                    DESIRED CAPACITY
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="desiredServerCount"
+            >
+                0
+            </div>
+
+
+            <div class="metric-footer positive">
+
+                ● Auto Scaling
+
+            </div>
+
+        </div>
+
+
+
+        <div class="metric-card">
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ⚙
+                </span>
+
+                <span class="metric-label">
+                    MAX CAPACITY
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="maxServerCount"
+            >
+                0
+            </div>
+
+
+            <div class="metric-footer positive">
+
+                ● Auto Scaling limit
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         EC2 INSTANCE TABLE
+    ================================================== -->
+
+    <div class="panel">
+
+
+        <div class="panel-header">
+
+
+            <div>
+
+                <h2>
+                    EC2 Instances
+                </h2>
+
+                <p>
+                    Live instances managed by healthscale-asg
+                </p>
+
+            </div>
+
+
+            <span class="live-badge">
+                LIVE AWS
+            </span>
+
+
+        </div>
+
+
+        <div class="table-container">
+
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            INSTANCE ID
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            HEALTH
+                        </th>
+
+                        <th>
+                            CPU
+                        </th>
+
+                        <th>
+                            LIFECYCLE
+                        </th>
+
+                        <th>
+                            REGION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="serversTableBody">
+
+
+                    <tr>
+
+                        <td colspan="6">
+
+                            <div
+                                style="
+                                    padding: 30px;
+                                    text-align: center;
+                                "
+                            >
+
+                                Loading AWS EC2 instances...
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         AUTO SCALING INFORMATION
+    ================================================== -->
+
+    <div class="panel">
+
+
+        <div class="panel-header">
+
+
+            <div>
+
+                <h2>
+                    Auto Scaling Group
+                </h2>
+
+                <p>
+                    healthscale-asg
+                </p>
+
+            </div>
+
+
+            <span class="live-badge">
+                ACTIVE
+            </span>
+
+
+        </div>
+
+
+
+        <div class="alb-info">
+
+
+            <div>
+
+                <span>
+                    Minimum Capacity
+                </span>
+
+                <strong id="asgMin">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Desired Capacity
+                </span>
+
+                <strong id="asgDesired">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Maximum Capacity
+                </span>
+
+                <strong id="asgMax">
+                    0
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+```
+
+</main>
+
+
+</div>
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script src="../js/api.js"></script>
+
+<script src="../js/servers.js"></script>
+
+</body>
+
+</html>

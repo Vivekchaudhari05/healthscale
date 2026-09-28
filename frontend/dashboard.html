@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+>
+
+<meta
+name="description"
+content="HealthScale AWS Infrastructure Monitoring Dashboard"
+
+>
+
+<meta
+name="theme-color"
+content="#0f172a"
+
+>
+
+<title>HealthScale | Infrastructure Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<div class="app-container">
+
+<!-- =====================================================
+     SIDEBAR
+====================================================== -->
+
+<aside class="sidebar">
+
+```
+<!-- BRAND -->
+
+<div class="brand">
+
+    <div class="brand-logo">
+        H
+    </div>
+
+    <div>
+
+        <h2>HealthScale</h2>
+
+        <span>
+            Cloud Monitoring
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- NAVIGATION -->
+
+<nav class="sidebar-nav">
+
+
+    <!-- =================================================
+         MAIN
+    ================================================== -->
+
+    <p class="nav-title">
+        MAIN
+    </p>
+
+
+    <!-- DASHBOARD -->
+
+    <a
+        href="dashboard.html"
+        class="nav-item active"
+    >
+
+        <span>▣</span>
+
+        Dashboard
+
+    </a>
+
+
+    <!-- SERVERS -->
+
+    <a
+        href="Pages/servers.html"
+        class="nav-item"
+    >
+
+        <span>▤</span>
+
+        Servers
+
+    </a>
+
+
+    <!-- PATIENTS -->
+
+    <a
+        href="Pages/patients.html"
+        class="nav-item"
+    >
+
+        <span>♙</span>
+
+        Patients
+
+    </a>
+
+
+    <!-- METRICS -->
+
+    <a
+        href="Pages/metrics.html"
+        class="nav-item"
+    >
+
+        <span>◉</span>
+
+        Metrics
+
+    </a>
+
+
+    <!-- AUTO SCALING -->
+
+    <a
+        href="Pages/autoscaling.html"
+        class="nav-item"
+    >
+
+        <span>↗</span>
+
+        Auto Scaling
+
+    </a>
+
+
+    <!-- =================================================
+         MONITORING
+    ================================================== -->
+
+    <p class="nav-title">
+        MONITORING
+    </p>
+
+
+    <!-- ALERTS -->
+
+    <a
+        href="Pages/alerts.html"
+        class="nav-item"
+    >
+
+        <span>⚠</span>
+
+        Alerts
+
+        <span
+            class="notification-count"
+            id="notificationCount"
+        >
+            0
+        </span>
+
+    </a>
+
+
+    <!-- ACTIVITY -->
+
+    <a
+        href="Pages/activity.html"
+        class="nav-item"
+    >
+
+        <span>◷</span>
+
+        Activity
+
+    </a>
+
+
+    <!-- =================================================
+         SYSTEM
+    ================================================== -->
+
+    <p class="nav-title">
+        SYSTEM
+    </p>
+
+
+    <!-- SETTINGS -->
+
+    <a
+        href="Pages/settings.html"
+        class="nav-item"
+    >
+
+        <span>⚙</span>
+
+        Settings
+
+    </a>
+
+
+</nav>
+
+
+<!-- SIDEBAR FOOTER -->
+
+<div class="sidebar-footer">
+
+
+    <div class="aws-region">
+
+        <span class="status-dot"></span>
+
+
+        <div>
+
+            <strong>
+                AWS Mumbai
+            </strong>
+
+            <small>
+                ap-south-1
+            </small>
+
+        </div>
+
+    </div>
+
+
+</div>
+```
+
+</aside>
+
+<!-- =====================================================
+     MAIN CONTENT
+====================================================== -->
+
+<main class="main-content">
+
+```
+<!-- =================================================
+     TOP BAR
+================================================== -->
+
+<header class="topbar">
+
+
+    <div>
+
+        <h1>
+            Infrastructure Overview
+        </h1>
+
+        <p>
+            Monitor your AWS infrastructure in real time
+        </p>
+
+    </div>
+
+
+    <div class="topbar-actions">
+
+
+        <!-- SYSTEM STATUS -->
+
+        <div class="system-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                System Operational
+            </span>
+
+        </div>
+
+
+        <!-- REFRESH -->
+
+        <button
+            class="refresh-btn"
+            type="button"
+        >
+
+            ↻ Refresh
+
+        </button>
+
+
+        <!-- USER -->
+
+        <div class="user-profile">
+
+
+            <div class="avatar">
+                A
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Admin
+                </strong>
+
+                <small>
+                    Administrator
+                </small>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</header>
+
+
+<!-- =================================================
+     DASHBOARD CONTENT
+================================================== -->
+
+<section
+    class="dashboard-content"
+    id="dashboardSection"
+>
+
+
+    <!-- =================================================
+         METRIC CARDS
+    ================================================== -->
+
+    <div class="metric-grid">
+
+
+        <!-- EC2 INSTANCES -->
+
+        <div class="metric-card">
+
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ◈
+                </span>
+
+                <span class="metric-label">
+                    EC2 INSTANCES
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="instanceCount"
+            >
+                0
+            </div>
+
+
+            <div
+                class="metric-footer positive"
+                id="healthyInstanceCount"
+            >
+
+                ● 0 Healthy
+
+            </div>
+
+
+        </div>
+
+
+        <!-- CPU -->
+
+        <div class="metric-card">
+
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ◉
+                </span>
+
+                <span class="metric-label">
+                    AVERAGE CPU
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="averageCpu"
+            >
+                0%
+            </div>
+
+
+            <div class="metric-footer positive">
+
+                ● Live AWS metric
+
+            </div>
+
+
+        </div>
+
+
+        <!-- REQUESTS -->
+
+        <div class="metric-card">
+
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ↗
+                </span>
+
+                <span class="metric-label">
+                    REQUESTS / MIN
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="requestCount"
+            >
+                0
+            </div>
+
+
+            <div class="metric-footer positive">
+
+                ● ALB RequestCount
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ALERTS -->
+
+        <div class="metric-card">
+
+
+            <div class="metric-header">
+
+                <span class="metric-icon">
+                    ⚠
+                </span>
+
+                <span class="metric-label">
+                    ACTIVE ALERTS
+                </span>
+
+            </div>
+
+
+            <div
+                class="metric-value"
+                id="activeAlertCount"
+            >
+                0
+            </div>
+
+
+            <div
+                class="metric-footer positive"
+                id="alertStatusText"
+            >
+
+                ● Monitoring normal
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         PERFORMANCE + AUTO SCALING
+    ================================================== -->
+
+    <div class="dashboard-row">
+
+
+        <!-- PERFORMANCE -->
+
+        <div
+            class="panel chart-panel"
+            id="performanceSection"
+        >
+
+
+            <div class="panel-header">
+
+
+                <div>
+
+                    <h2>
+                        Infrastructure Performance
+                    </h2>
+
+                    <p>
+                        Real-time metrics from AWS CloudWatch
+                    </p>
+
+                </div>
+
+
+                <select
+                    id="metricSelector"
+                >
+
+                    <option value="cpu">
+                        CPU Utilization
+                    </option>
+
+                    <option value="requests">
+                        Request Count
+                    </option>
+
+                </select>
+
+
+            </div>
+
+
+            <div class="chart-container">
+
+                <canvas
+                    id="performanceChart"
+                ></canvas>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- AUTO SCALING -->
+
+        <div
+            class="panel scaling-panel"
+            id="autoscalingSection"
+        >
+
+
+            <div class="panel-header">
+
+
+                <div>
+
+                    <h2>
+                        Auto Scaling
+                    </h2>
+
+                    <p>
+                        healthscale-asg
+                    </p>
+
+                </div>
+
+
+                <span class="live-badge">
+                    LIVE
+                </span>
+
+
+            </div>
+
+
+            <div class="scaling-status">
+
+
+                <div class="scaling-item">
+
+                    <span>
+                        Min Capacity
+                    </span>
+
+                    <strong id="minCapacity">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="scaling-item">
+
+                    <span>
+                        Desired
+                    </span>
+
+                    <strong id="desiredCapacity">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="scaling-item">
+
+                    <span>
+                        Max Capacity
+                    </span>
+
+                    <strong id="maxCapacity">
+                        0
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="cpu-target">
+
+
+                <div class="cpu-target-header">
+
+                    <span>
+                        CPU Target
+                    </span>
+
+                    <strong>
+                        50%
+                    </strong>
+
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill"
+                        id="cpuProgress"
+                        style="width: 0%"
+                    ></div>
+
+                </div>
+
+
+                <small id="currentCpuText">
+
+                    Current average CPU: 0%
+
+                </small>
+
+
+            </div>
+
+
+            <div class="scaling-state">
+
+
+                <span class="status-dot"></span>
+
+
+                <div>
+
+                    <strong id="scalingState">
+                        Scaling Stable
+                    </strong>
+
+                    <small id="scalingDescription">
+                        Waiting for AWS metrics
+                    </small>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         EC2 SERVERS
+    ================================================== -->
+
+    <div
+        class="panel"
+        id="serversSection"
+    >
+
+
+        <div class="panel-header">
+
+
+            <div>
+
+                <h2>
+                    EC2 Instances
+                </h2>
+
+                <p>
+                    Instances managed by healthscale-asg
+                </p>
+
+            </div>
+
+
+            <button
+                class="view-all"
+                type="button"
+                onclick="window.location.href='Pages/servers.html'"
+            >
+
+                View All →
+
+            </button>
+
+
+        </div>
+
+
+        <div class="table-container">
+
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            INSTANCE
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            CPU
+                        </th>
+
+                        <th>
+                            HEALTH
+                        </th>
+
+                        <th>
+                            AVAILABILITY ZONE
+                        </th>
+
+                        <th>
+                            ACTIONS
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="instancesTableBody">
+
+
+                    <tr>
+
+                        <td colspan="6">
+
+                            <div
+                                style="
+                                    padding: 25px;
+                                    text-align: center;
+                                "
+                            >
+
+                                Loading EC2 instances...
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         ALB + ALERTS
+    ================================================== -->
+
+    <div class="dashboard-row">
+
+
+        <!-- LOAD BALANCER -->
+
+        <div
+            class="panel"
+            id="albSection"
+        >
+
+
+            <div class="panel-header">
+
+
+                <div>
+
+                    <h2>
+                        Load Balancer
+                    </h2>
+
+                    <p>
+                        Application Load Balancer
+                    </p>
+
+                </div>
+
+
+                <span
+                    class="live-badge"
+                    id="albStatus"
+                >
+                    LIVE
+                </span>
+
+
+            </div>
+
+
+            <div class="alb-info">
+
+
+                <div>
+
+                    <span>
+                        Load Balancer
+                    </span>
+
+                    <strong>
+                        healthscale-alb
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Target Group
+                    </span>
+
+                    <strong>
+                        healthscale-tg
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Requests
+                    </span>
+
+                    <strong id="albRequestCount">
+                        0
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ALERTS -->
+
+        <div
+            class="panel"
+            id="alertsSection"
+        >
+
+
+            <div class="panel-header">
+
+
+                <div>
+
+                    <h2>
+                        Recent Alerts
+                    </h2>
+
+                    <p>
+                        CloudWatch monitoring events
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="view-all"
+                    type="button"
+                    onclick="window.location.href='Pages/alerts.html'"
+                >
+
+                    View All →
+
+                </button>
+
+
+            </div>
+
+
+            <div
+                class="alert-list"
+                id="alertsList"
+            >
+
+
+                <div class="alert-item">
+
+
+                    <span class="alert-icon success">
+                        ✓
+                    </span>
+
+
+                    <div class="alert-content">
+
+
+                        <strong>
+                            Loading monitoring status...
+                        </strong>
+
+
+                        <small>
+                            Connecting to AWS CloudWatch
+                        </small>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         ACTIVITY
+    ================================================== -->
+
+    <div
+        class="panel"
+        id="activitySection"
+    >
+
+
+        <div class="panel-header">
+
+
+            <div>
+
+                <h2>
+                    Recent Activity
+                </h2>
+
+                <p>
+                    HealthScale infrastructure activity
+                </p>
+
+            </div>
+
+
+            <button
+                class="view-all"
+                type="button"
+                onclick="window.location.href='Pages/activity.html'"
+            >
+
+                View All →
+
+            </button>
+
+
+        </div>
+
+
+        <div class="alert-list">
+
+
+            <div class="alert-item">
+
+
+                <span class="alert-icon success">
+                    ✓
+                </span>
+
+
+                <div class="alert-content">
+
+
+                    <strong>
+                        HealthScale monitoring active
+                    </strong>
+
+
+                    <small>
+                        AWS infrastructure data is being monitored
+                    </small>
+
+
+                </div>
+
+
+            </div>
+
+
+            <div class="alert-item">
+
+
+                <span class="alert-icon success">
+                    ✓
+                </span>
+
+
+                <div class="alert-content">
+
+
+                    <strong>
+                        Auto Scaling enabled
+                    </strong>
+
+
+                    <small>
+                        Target tracking CPU policy configured at 50%
+                    </small>
+
+
+                </div>
+
+
+            </div>
+
+
+            <div class="alert-item">
+
+
+                <span class="alert-icon success">
+                    ✓
+                </span>
+
+
+                <div class="alert-content">
+
+
+                    <strong>
+                        CloudWatch monitoring enabled
+                    </strong>
+
+
+                    <small>
+                        HealthScale-HighCPU alarm is being monitored
+                    </small>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         SETTINGS
+    ================================================== -->
+
+    <div
+        class="panel"
+        id="settingsSection"
+    >
+
+
+        <div class="panel-header">
+
+
+            <div>
+
+                <h2>
+                    System Configuration
+                </h2>
+
+                <p>
+                    HealthScale monitoring environment
+                </p>
+
+            </div>
+
+
+            <button
+                class="view-all"
+                type="button"
+                onclick="window.location.href='Pages/settings.html'"
+            >
+
+                View All →
+
+            </button>
+
+
+        </div>
+
+
+        <div class="alb-info">
+
+
+            <div>
+
+                <span>
+                    AWS Region
+                </span>
+
+                <strong>
+                    ap-south-1
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Auto Scaling Group
+                </span>
+
+                <strong>
+                    healthscale-asg
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Load Balancer
+                </span>
+
+                <strong>
+                    healthscale-alb
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+```
+
+</main>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script src="js/app.js"></script>
+
+<script src="js/api.js"></script>
+
+<script src="js/charts.js"></script>
+
+<script src="js/dashboard.js"></script>
+
+<script src="js/notifications.js"></script>
+
+
+</body>
+
+</html>

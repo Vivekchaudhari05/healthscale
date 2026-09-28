@@ -1,0 +1,5276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="HealthScale patient management and healthcare monitoring dashboard.">
+
+    <title>Patients | HealthScale</title>
+
+    <!-- Main HealthScale CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        /* =========================================================
+           PATIENT PAGE
+        ========================================================= */
+
+        .patients-page {
+            animation: pageFadeIn 0.5s ease;
+        }
+
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .page-heading h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .heading-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            border: 0;
+            border-radius: 10px;
+            padding: 11px 17px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        .primary-btn {
+            color: white;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.3);
+        }
+
+        .secondary-btn {
+            color: #cbd5e1;
+            background: #172033;
+            border: 1px solid #263247;
+        }
+
+        .secondary-btn:hover {
+            background: #1d293d;
+        }
+
+        /* =========================================================
+           PATIENT STATISTICS
+        ========================================================= */
+
+        .patient-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .patient-stat-card {
+            position: relative;
+            overflow: hidden;
+            background: #111827;
+            border: 1px solid #202c3f;
+            border-radius: 14px;
+            padding: 18px;
+            transition: 0.25s ease;
+        }
+
+        .patient-stat-card:hover {
+            transform: translateY(-3px);
+            border-color: #334155;
+        }
+
+        .patient-stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .patient-stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #172033;
+            font-size: 19px;
+        }
+
+        .patient-stat-label {
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .patient-stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .stat-stable .patient-stat-icon {
+            color: #22c55e;
+        }
+
+        .stat-warning .patient-stat-icon {
+            color: #f59e0b;
+        }
+
+        .stat-critical .patient-stat-icon {
+            color: #ef4444;
+        }
+
+        /* =========================================================
+           PATIENT REGISTRY
+        ========================================================= */
+
+        .patient-registry {
+            background: #111827;
+            border: 1px solid #202c3f;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+
+        .registry-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 18px 20px;
+            border-bottom: 1px solid #202c3f;
+        }
+
+        .registry-title h2 {
+            margin: 0 0 5px;
+            font-size: 17px;
+        }
+
+        .registry-title p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .refresh-patients-btn {
+            border: 1px solid #29364b;
+            background: #172033;
+            color: #cbd5e1;
+            border-radius: 8px;
+            padding: 9px 13px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .refresh-patients-btn:hover {
+            background: #1e293b;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .patients-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        .patients-table th {
+            text-align: left;
+            padding: 13px 15px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #0f172a;
+            border-bottom: 1px solid #202c3f;
+        }
+
+        .patients-table td {
+            padding: 15px;
+            color: #cbd5e1;
+            font-size: 13px;
+            border-bottom: 1px solid #1b2637;
+        }
+
+        .patients-table tbody tr {
+            transition: 0.2s ease;
+        }
+
+        .patients-table tbody tr:hover {
+            background: #151f31;
+        }
+
+        .patients-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-stable {
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .status-warning {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .status-critical {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .view-patient-btn {
+            border: 1px solid #334155;
+            color: #93c5fd;
+            background: #172033;
+            padding: 7px 11px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .view-patient-btn:hover {
+            background: #1d4ed8;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        /* =========================================================
+           MONITORING INFO
+        ========================================================= */
+
+        .monitoring-info {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 18px;
+        }
+
+        .info-panel {
+            background: #111827;
+            border: 1px solid #202c3f;
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            color: #94a3b8;
+            line-height: 1.7;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .monitoring-list {
+            margin: 14px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .monitoring-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cbd5e1;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .monitoring-list li span {
+            color: #22c55e;
+        }
+
+        /* =========================================================
+           DRAWER OVERLAY
+        ========================================================= */
+
+        .patient-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            background: rgba(2, 6, 23, 0.72);
+            backdrop-filter: blur(5px);
+        }
+
+        .patient-modal.open {
+            display: flex;
+        }
+
+        .patient-drawer {
+            width: min(610px, 100%);
+            height: 100%;
+            margin-left: auto;
+            background: #0f172a;
+            border-left: 1px solid #263247;
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.35);
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(.22, .61, .36, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-drawer.open {
+            transform: translateX(0);
+        }
+
+        body.patient-modal-open {
+            overflow: hidden;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border-bottom: 1px solid #263247;
+            background: #111827;
+        }
+
+        .drawer-header-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .drawer-header-icon {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(37, 99, 235, 0.14);
+            color: #60a5fa;
+            font-size: 21px;
+        }
+
+        .drawer-header h2 {
+            margin: 0 0 4px;
+            font-size: 18px;
+        }
+
+        .drawer-header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .close-drawer-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 9px;
+            border: 1px solid #29364b;
+            background: #172033;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 19px;
+            transition: 0.2s ease;
+        }
+
+        .close-drawer-btn:hover {
+            color: white;
+            background: #263247;
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .drawer-body::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .drawer-body::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        .drawer-body::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        /* =========================================================
+           FORM SECTIONS
+        ========================================================= */
+
+        .form-section {
+            margin-bottom: 22px;
+            padding: 17px;
+            background: #111827;
+            border: 1px solid #202c3f;
+            border-radius: 13px;
+            animation: sectionAppear 0.35s ease both;
+        }
+
+        .form-section:nth-child(2) {
+            animation-delay: 0.04s;
+        }
+
+        .form-section:nth-child(3) {
+            animation-delay: 0.08s;
+        }
+
+        .form-section:nth-child(4) {
+            animation-delay: 0.12s;
+        }
+
+        @keyframes sectionAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 17px;
+        }
+
+        .section-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(37, 99, 235, 0.14);
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .form-section-header h3 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .form-section-header p {
+            margin: 2px 0 0;
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            color: #cbd5e1;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .form-control {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #29364b;
+            background: #0b1220;
+            color: #e2e8f0;
+            border-radius: 9px;
+            padding: 11px 12px;
+            outline: none;
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.09);
+        }
+
+        .form-control::placeholder {
+            color: #475569;
+        }
+
+        .form-control[readonly] {
+            color: #60a5fa;
+            background: #111b2e;
+            cursor: not-allowed;
+        }
+
+        textarea.form-control {
+            min-height: 82px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        .field-help {
+            color: #64748b;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .field-error {
+            display: none;
+            color: #f87171;
+            font-size: 10px;
+        }
+
+        .form-group.invalid .form-control {
+            border-color: #ef4444;
+        }
+
+        .form-group.invalid .field-error {
+            display: block;
+        }
+
+        /* =========================================================
+           CONDITION PREVIEW
+        ========================================================= */
+
+        .condition-preview {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 12px;
+            border-radius: 9px;
+            background: #0b1220;
+            border: 1px solid #29364b;
+            margin-top: 2px;
+        }
+
+        .condition-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+        }
+
+        .condition-preview-text {
+            color: #cbd5e1;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .condition-preview.stable .condition-dot {
+            background: #22c55e;
+        }
+
+        .condition-preview.attention .condition-dot {
+            background: #f59e0b;
+        }
+
+        .condition-preview.critical .condition-dot {
+            background: #ef4444;
+        }
+
+        /* =========================================================
+           REGISTRATION NOTE
+        ========================================================= */
+
+        .registration-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(37, 99, 235, 0.07);
+            border: 1px solid rgba(59, 130, 246, 0.16);
+            color: #93c5fd;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        .registration-note-icon {
+            font-size: 15px;
+        }
+
+        /* =========================================================
+           DRAWER FOOTER
+        ========================================================= */
+
+        .drawer-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 15px 20px;
+            border-top: 1px solid #263247;
+            background: #111827;
+        }
+
+        .drawer-footer button {
+            min-width: 105px;
+        }
+
+        .save-patient-btn.loading {
+            pointer-events: none;
+            opacity: 0.75;
+        }
+
+        .save-patient-btn.loading .save-text {
+            display: none;
+        }
+
+        .save-patient-btn.loading .loading-text {
+            display: inline;
+        }
+
+        .loading-text {
+            display: none;
+        }
+
+        /* =========================================================
+           HEALTH PROFILE DRAWER
+        ========================================================= */
+
+        .profile-drawer {
+            width: min(760px, 100%);
+            height: 100%;
+            margin-left: auto;
+            background: #0f172a;
+            border-left: 1px solid #263247;
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.35);
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(.22, .61, .36, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .profile-header {
+            padding: 20px;
+            background: #111827;
+            border-bottom: 1px solid #263247;
+        }
+
+        .profile-header-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .profile-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .profile-name {
+            flex: 1;
+        }
+
+        .profile-name h2 {
+            margin: 0 0 5px;
+            font-size: 19px;
+        }
+
+        .profile-meta {
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .profile-status {
+            margin-top: 11px;
+        }
+
+        .profile-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .profile-section-title {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .profile-info-item {
+            padding: 12px;
+            border: 1px solid #202c3f;
+            background: #111827;
+            border-radius: 10px;
+        }
+
+        .profile-info-item span {
+            display: block;
+            color: #64748b;
+            font-size: 9px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .profile-info-item strong {
+            color: #cbd5e1;
+            font-size: 11px;
+        }
+
+        /* =========================================================
+           VITALS
+        ========================================================= */
+
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .vital-card {
+            background: #111827;
+            border: 1px solid #202c3f;
+            border-radius: 11px;
+            padding: 13px;
+        }
+
+        .vital-label {
+            color: #64748b;
+            font-size: 9px;
+            margin-bottom: 7px;
+        }
+
+        .vital-value {
+            color: #f8fafc;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .vital-unit {
+            color: #64748b;
+            font-size: 9px;
+        }
+
+        .vital-status {
+            margin-top: 7px;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .vital-status.normal {
+            color: #22c55e;
+        }
+
+        .vital-status.attention {
+            color: #f59e0b;
+        }
+
+        .vital-status.critical {
+            color: #ef4444;
+        }
+
+        /* =========================================================
+           HEALTH SCORE
+        ========================================================= */
+
+        .health-score-card {
+            background: #111827;
+            border: 1px solid #202c3f;
+            border-radius: 13px;
+            padding: 17px;
+        }
+
+        .health-score-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .health-score-label {
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .health-score-value {
+            font-size: 25px;
+            font-weight: 800;
+            color: #22c55e;
+        }
+
+        .score-track {
+            height: 7px;
+            background: #1e293b;
+            border-radius: 20px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            width: 84%;
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+            border-radius: inherit;
+        }
+
+        /* =========================================================
+           VITAL HISTORY
+        ========================================================= */
+
+        .history-card {
+            background: #111827;
+            border: 1px solid #202c3f;
+            border-radius: 13px;
+            padding: 17px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .chart-filter {
+            border: 1px solid #29364b;
+            background: #172033;
+            color: #94a3b8;
+            padding: 6px 8px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 9px;
+        }
+
+        .chart-filter.active {
+            color: #fff;
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 250px;
+        }
+
+        .history-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 13px;
+        }
+
+        .history-summary-item {
+            background: #0b1220;
+            border: 1px solid #202c3f;
+            border-radius: 9px;
+            padding: 9px;
+        }
+
+        .history-summary-item span {
+            display: block;
+            color: #64748b;
+            font-size: 8px;
+            margin-bottom: 4px;
+        }
+
+        .history-summary-item strong {
+            color: #cbd5e1;
+            font-size: 11px;
+        }
+
+        /* =========================================================
+           PROFILE ALERTS
+        ========================================================= */
+
+        .profile-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(34, 197, 94, 0.06);
+            border: 1px solid rgba(34, 197, 94, 0.12);
+        }
+
+        .profile-alert-icon {
+            color: #22c55e;
+        }
+
+        .profile-alert-content strong {
+            display: block;
+            color: #cbd5e1;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .profile-alert-content p {
+            margin: 0;
+            color: #64748b;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        /* =========================================================
+           TOAST
+        ========================================================= */
+
+        .patient-toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 11000;
+            min-width: 280px;
+            max-width: 390px;
+            padding: 13px 16px;
+            border-radius: 11px;
+            background: #111827;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(120px);
+            opacity: 0;
+            transition: 0.3s ease;
+            font-size: 12px;
+        }
+
+        .patient-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1000px) {
+
+            .patient-stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .monitoring-info {
+                grid-template-columns: 1fr;
+            }
+
+            .vitals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .page-heading {
+                flex-direction: column;
+            }
+
+            .heading-actions {
+                width: 100%;
+            }
+
+            .heading-actions button {
+                flex: 1;
+            }
+
+            .patient-stat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .profile-info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .patient-stat-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .drawer-body,
+            .profile-body {
+                padding: 14px;
+            }
+
+            .drawer-footer {
+                padding: 12px 14px;
+            }
+
+            .profile-info-grid,
+            .vitals-grid,
+            .history-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-toast {
+                left: 14px;
+                right: 14px;
+                min-width: 0;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- =========================================================
+         SIDEBAR
+    ========================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">H</div>
+
+            <div>
+                <h2>HealthScale</h2>
+                <span>Cloud Monitoring</span>
+            </div>
+
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <p class="nav-title">MAIN</p>
+
+            <a href="../dashboard.html" class="nav-item">
+                <span>▣</span>
+                Dashboard
+            </a>
+
+            <a href="servers.html" class="nav-item">
+                <span>▤</span>
+                Servers
+            </a>
+
+            <a href="patients.html" class="nav-item active">
+                <span>♙</span>
+                Patients
+            </a>
+
+            <a href="metrics.html" class="nav-item">
+                <span>◉</span>
+                Metrics
+            </a>
+
+            <a href="autoscaling.html" class="nav-item">
+                <span>↗</span>
+                Auto Scaling
+            </a>
+
+            <p class="nav-title">MONITORING</p>
+
+            <a href="alerts.html" class="nav-item">
+
+                <span>⚠</span>
+
+                Alerts
+
+                <span
+                    class="notification-count"
+                    id="notificationCount"
+                >
+                    0
+                </span>
+
+            </a>
+
+            <a href="activity.html" class="nav-item">
+                <span>◷</span>
+                Activity
+            </a>
+
+            <p class="nav-title">SYSTEM</p>
+
+            <a href="settings.html" class="nav-item">
+                <span>⚙</span>
+                Settings
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="aws-region">
+
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>AWS Mumbai</strong>
+                    <small>ap-south-1</small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================== -->
+
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+                <h3>Patient Management</h3>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    System Healthy
+                </div>
+
+                <button
+                    class="refresh-btn"
+                    type="button"
+                    onclick="renderPatients()"
+                >
+                    ↻
+                </button>
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        A
+                    </div>
+
+                    <div>
+                        <strong>Administrator</strong>
+                        <small>HealthScale</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             PATIENT PAGE
+        ====================================================== -->
+
+        <div class="dashboard-content patients-page">
+
+            <!-- PAGE HEADING -->
+
+            <div class="page-heading">
+
+                <div>
+
+                    <h1>Patients</h1>
+
+                    <p>
+                        Register patients and monitor their health condition
+                        from one centralized dashboard.
+                    </p>
+
+                </div>
+
+                <div class="heading-actions">
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        id="refreshPatientsButton"
+                    >
+                        ↻ Refresh
+                    </button>
+
+                    <button
+                        type="button"
+                        class="primary-btn"
+                        id="addPatientButton"
+                    >
+                        + Add Patient
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 STATISTICS
+            ================================================== -->
+
+            <div class="patient-stat-grid">
+
+                <div class="patient-stat-card">
+
+                    <div class="patient-stat-top">
+
+                        <div class="patient-stat-label">
+                            TOTAL PATIENTS
+                        </div>
+
+                        <div class="patient-stat-icon">
+                            ♙
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="patient-stat-value"
+                        id="totalPatients"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="patient-stat-card stat-stable">
+
+                    <div class="patient-stat-top">
+
+                        <div class="patient-stat-label">
+                            STABLE
+                        </div>
+
+                        <div class="patient-stat-icon">
+                            ✓
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="patient-stat-value"
+                        id="stablePatients"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="patient-stat-card stat-warning">
+
+                    <div class="patient-stat-top">
+
+                        <div class="patient-stat-label">
+                            NEEDS ATTENTION
+                        </div>
+
+                        <div class="patient-stat-icon">
+                            !
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="patient-stat-value"
+                        id="attentionPatients"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="patient-stat-card stat-critical">
+
+                    <div class="patient-stat-top">
+
+                        <div class="patient-stat-label">
+                            CRITICAL
+                        </div>
+
+                        <div class="patient-stat-icon">
+                            ⚠
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="patient-stat-value"
+                        id="criticalPatients"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PATIENT REGISTRY
+            ================================================== -->
+
+            <div class="patient-registry">
+
+                <div class="registry-header">
+
+                    <div class="registry-title">
+
+                        <h2>Patient Registry</h2>
+
+                        <p>
+                            Registered patients and their current health status
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="refresh-patients-btn"
+                        id="registryRefreshButton"
+                    >
+                        ↻ Refresh
+                    </button>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table class="patients-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Patient ID</th>
+
+                                <th>Name</th>
+
+                                <th>Age</th>
+
+                                <th>Gender</th>
+
+                                <th>Contact</th>
+
+                                <th>Condition</th>
+
+                                <th>Registered</th>
+
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="patientsTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 MONITORING INFORMATION
+            ================================================== -->
+
+            <div class="monitoring-info">
+
+                <div class="info-panel">
+
+                    <h3>Health Monitoring</h3>
+
+                    <p>
+                        HealthScale provides a centralized interface for
+                        registering patients and monitoring their health
+                        information. Each patient receives a unique Patient ID
+                        automatically.
+                    </p>
+
+                    <ul class="monitoring-list">
+
+                        <li>
+                            <span>✓</span>
+                            Patient information is stored locally for the demo.
+                        </li>
+
+                        <li>
+                            <span>✓</span>
+                            Patient IDs are automatically generated.
+                        </li>
+
+                        <li>
+                            <span>✓</span>
+                            Health status is tracked in the registry.
+                        </li>
+
+                        <li>
+                            <span>✓</span>
+                            Patient profile includes vital monitoring.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <div class="info-panel">
+
+                    <h3>Cloud Architecture</h3>
+
+                    <p>
+                        The HealthScale platform is designed to integrate with
+                        AWS services such as EC2 Auto Scaling, Application Load
+                        Balancer and CloudWatch for scalable healthcare
+                        monitoring.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =============================================================
+     ADD PATIENT MODAL + DRAWER
+============================================================= -->
+
+<div
+    class="patient-modal"
+    id="patientModal"
+>
+
+    <div
+        class="patient-drawer"
+        id="patientDrawer"
+    >
+
+        <!-- HEADER -->
+
+        <div class="drawer-header">
+
+            <div class="drawer-header-left">
+
+                <div class="drawer-header-icon">
+                    ♙
+                </div>
+
+                <div>
+
+                    <h2>Add New Patient</h2>
+
+                    <p>
+                        Register a new patient into HealthScale
+                    </p>
+
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="close-drawer-btn"
+                id="closePatientButton"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- BODY -->
+
+        <div class="drawer-body">
+
+            <form
+                id="patientForm"
+                autocomplete="off"
+            >
+
+                <!-- =================================================
+                     SECTION 01
+                ================================================== -->
+
+                <div class="form-section">
+
+                    <div class="form-section-header">
+
+                        <div class="section-number">
+                            01
+                        </div>
+
+                        <div>
+
+                            <h3>Patient Information</h3>
+
+                            <p>
+                                Basic identity and demographic information
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <!-- Patient ID -->
+
+                        <div class="form-group">
+
+                            <label for="patientId">
+                                Patient ID
+                            </label>
+
+                            <input
+                                type="text"
+                                id="patientId"
+                                name="patient_id"
+                                class="form-control"
+                                readonly
+                            >
+
+                            <span class="field-help">
+                                Automatically generated by HealthScale.
+                            </span>
+
+                        </div>
+
+
+                        <!-- Full Name -->
+
+                        <div
+                            class="form-group"
+                            data-field="name"
+                        >
+
+                            <label for="patientName">
+                                Full Name
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="patientName"
+                                name="name"
+                                class="form-control"
+                                placeholder="Enter patient's full name"
+                                maxlength="80"
+                            >
+
+                            <span class="field-error">
+                                Please enter at least 2 characters.
+                            </span>
+
+                        </div>
+
+
+                        <!-- DOB -->
+
+                        <div class="form-group">
+
+                            <label for="patientDob">
+                                Date of Birth
+                            </label>
+
+                            <input
+                                type="date"
+                                id="patientDob"
+                                name="date_of_birth"
+                                class="form-control"
+                            >
+
+                        </div>
+
+
+                        <!-- Age -->
+
+                        <div
+                            class="form-group"
+                            data-field="age"
+                        >
+
+                            <label for="patientAge">
+                                Age
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="number"
+                                id="patientAge"
+                                name="age"
+                                class="form-control"
+                                placeholder="Age"
+                                min="0"
+                                max="120"
+                            >
+
+                            <span class="field-error">
+                                Please enter a valid age between 0 and 120.
+                            </span>
+
+                        </div>
+
+
+                        <!-- Gender -->
+
+                        <div
+                            class="form-group"
+                            data-field="gender"
+                        >
+
+                            <label for="patientGender">
+                                Gender
+                                <span class="required">*</span>
+                            </label>
+
+                            <select
+                                id="patientGender"
+                                name="gender"
+                                class="form-control"
+                            >
+
+                                <option value="">
+                                    Select gender
+                                </option>
+
+                                <option value="Male">
+                                    Male
+                                </option>
+
+                                <option value="Female">
+                                    Female
+                                </option>
+
+                                <option value="Other">
+                                    Other
+                                </option>
+
+                            </select>
+
+                            <span class="field-error">
+                                Please select gender.
+                            </span>
+
+                        </div>
+
+
+                        <!-- Blood Group -->
+
+                        <div class="form-group">
+
+                            <label for="patientBloodGroup">
+                                Blood Group
+                            </label>
+
+                            <select
+                                id="patientBloodGroup"
+                                name="blood_group"
+                                class="form-control"
+                            >
+
+                                <option value="">
+                                    Select blood group
+                                </option>
+
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     SECTION 02
+                ================================================== -->
+
+                <div class="form-section">
+
+                    <div class="form-section-header">
+
+                        <div class="section-number">
+                            02
+                        </div>
+
+                        <div>
+
+                            <h3>Contact Information</h3>
+
+                            <p>
+                                Contact and emergency information
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <!-- Phone -->
+
+                        <div
+                            class="form-group"
+                            data-field="phone"
+                        >
+
+                            <label for="patientPhone">
+                                Phone Number
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="patientPhone"
+                                name="phone"
+                                class="form-control"
+                                placeholder="9876543210"
+                                maxlength="15"
+                            >
+
+                            <span class="field-error">
+                                Enter a valid phone number.
+                            </span>
+
+                        </div>
+
+
+                        <!-- Email -->
+
+                        <div class="form-group">
+
+                            <label for="patientEmail">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="patientEmail"
+                                name="email"
+                                class="form-control"
+                                placeholder="patient@example.com"
+                            >
+
+                        </div>
+
+
+                        <!-- Emergency Contact -->
+
+                        <div class="form-group">
+
+                            <label for="emergencyContact">
+                                Emergency Contact
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="emergencyContact"
+                                name="emergency_contact"
+                                class="form-control"
+                                placeholder="Emergency contact number"
+                                maxlength="15"
+                            >
+
+                        </div>
+
+
+                        <!-- Address -->
+
+                        <div class="form-group full">
+
+                            <label for="patientAddress">
+                                Residential Address
+                            </label>
+
+                            <textarea
+                                id="patientAddress"
+                                name="address"
+                                class="form-control"
+                                placeholder="Enter complete residential address"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     SECTION 03
+                ================================================== -->
+
+                <div class="form-section">
+
+                    <div class="form-section-header">
+
+                        <div class="section-number">
+                            03
+                        </div>
+
+                        <div>
+
+                            <h3>Medical Information</h3>
+
+                            <p>
+                                Initial medical and monitoring information
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <!-- Health Status -->
+
+                        <div class="form-group">
+
+                            <label for="patientCondition">
+                                Initial Health Status
+                            </label>
+
+                            <select
+                                id="patientCondition"
+                                name="condition"
+                                class="form-control"
+                            >
+
+                                <option value="Stable">
+                                    Stable
+                                </option>
+
+                                <option value="Needs Attention">
+                                    Needs Attention
+                                </option>
+
+                                <option value="Critical">
+                                    Critical
+                                </option>
+
+                            </select>
+
+                            <div
+                                class="condition-preview stable"
+                                id="conditionPreview"
+                            >
+
+                                <span class="condition-dot"></span>
+
+                                <span
+                                    class="condition-preview-text"
+                                    id="conditionPreviewText"
+                                >
+                                    Patient currently appears stable.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Allergies -->
+
+                        <div class="form-group">
+
+                            <label for="patientAllergies">
+                                Allergies
+                            </label>
+
+                            <input
+                                type="text"
+                                id="patientAllergies"
+                                name="allergies"
+                                class="form-control"
+                                placeholder="e.g. Penicillin, peanuts"
+                            >
+
+                        </div>
+
+
+                        <!-- Medications -->
+
+                        <div class="form-group full">
+
+                            <label for="patientMedications">
+                                Current Medications
+                            </label>
+
+                            <textarea
+                                id="patientMedications"
+                                name="medications"
+                                class="form-control"
+                                placeholder="Enter current medicines and dosage information"
+                            ></textarea>
+
+                        </div>
+
+
+                        <!-- Medical Notes -->
+
+                        <div class="form-group full">
+
+                            <label for="medicalNotes">
+                                Medical / Monitoring Notes
+                            </label>
+
+                            <textarea
+                                id="medicalNotes"
+                                name="medical_notes"
+                                class="form-control"
+                                placeholder="Enter relevant medical history or monitoring notes"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     SECTION 04
+                ================================================== -->
+
+                <div class="form-section">
+
+                    <div class="form-section-header">
+
+                        <div class="section-number">
+                            04
+                        </div>
+
+                        <div>
+
+                            <h3>Registration</h3>
+
+                            <p>
+                                Confirm patient registration
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="registration-note">
+
+                        <div class="registration-note-icon">
+                            🔒
+                        </div>
+
+                        <div>
+                            Patient registration information is currently
+                            stored in this browser for the HealthScale demo.
+                            The application can later connect this form to
+                            AWS-backed storage.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Hidden submit button -->
+
+                <button
+                    type="submit"
+                    style="display:none;"
+                    aria-hidden="true"
+                >
+                    Submit
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <div class="drawer-footer">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                id="cancelPatientButton"
+            >
+                Cancel
+            </button>
+
+            <button
+                type="submit"
+                class="primary-btn save-patient-btn"
+                id="savePatientButton"
+                form="patientForm"
+            >
+
+                <span class="save-text">
+                    Register Patient
+                </span>
+
+                <span class="loading-text">
+                    Saving...
+                </span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     HEALTH PROFILE MODAL
+============================================================= -->
+
+<div
+    class="patient-modal"
+    id="healthProfileModal"
+>
+
+    <div
+        class="profile-drawer"
+        id="healthProfileDrawer"
+    >
+
+        <!-- PROFILE HEADER -->
+
+        <div class="profile-header">
+
+            <div class="profile-header-top">
+
+                <div
+                    class="profile-avatar"
+                    id="profileAvatar"
+                >
+                    P
+                </div>
+
+                <div class="profile-name">
+
+                    <h2 id="profileName">
+                        Patient
+                    </h2>
+
+                    <div class="profile-meta">
+
+                        ID:
+                        <span id="profilePatientId">
+                            --
+                        </span>
+
+                        &nbsp;•&nbsp;
+
+                        <span id="profileAgeMeta">
+                            --
+                        </span>
+
+                        years
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="close-drawer-btn"
+                    id="closeHealthProfileButton"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div class="profile-status">
+
+                <span
+                    class="status-badge status-stable"
+                    id="profileCondition"
+                >
+                    Stable
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- PROFILE BODY -->
+
+        <div class="profile-body">
+
+            <!-- PATIENT INFORMATION -->
+
+            <section class="profile-section">
+
+                <h3 class="profile-section-title">
+                    Patient Information
+                </h3>
+
+                <div class="profile-info-grid">
+
+                    <div class="profile-info-item">
+
+                        <span>Age</span>
+
+                        <strong id="profileAge">
+                            --
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Gender</span>
+
+                        <strong id="profileGender">
+                            --
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Blood Group</span>
+
+                        <strong id="profileBlood">
+                            --
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Phone</span>
+
+                        <strong id="profilePhone">
+                            --
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Emergency</span>
+
+                        <strong id="profileEmergency">
+                            --
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Registered</span>
+
+                        <strong id="profileRegistered">
+                            --
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Allergies</span>
+
+                        <strong id="profileAllergies">
+                            None recorded
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Medications</span>
+
+                        <strong id="profileMedications">
+                            None recorded
+                        </strong>
+
+                    </div>
+
+                    <div class="profile-info-item">
+
+                        <span>Email</span>
+
+                        <strong id="profileEmail">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CURRENT VITALS -->
+
+            <section class="profile-section">
+
+                <h3 class="profile-section-title">
+                    Current Vital Signs
+                </h3>
+
+                <div class="vitals-grid">
+
+                    <div class="vital-card">
+
+                        <div class="vital-label">
+                            HEART RATE
+                        </div>
+
+                        <div class="vital-value">
+                            <span id="vitalHeartRate">
+                                72
+                            </span>
+
+                            <span class="vital-unit">
+                                BPM
+                            </span>
+                        </div>
+
+                        <div
+                            class="vital-status normal"
+                            id="heartRateStatus"
+                        >
+                            ● Normal
+                        </div>
+
+                    </div>
+
+
+                    <div class="vital-card">
+
+                        <div class="vital-label">
+                            SpO₂
+                        </div>
+
+                        <div class="vital-value">
+
+                            <span id="vitalSpo2">
+                                98
+                            </span>
+
+                            <span class="vital-unit">
+                                %
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="vital-status normal"
+                            id="spo2Status"
+                        >
+                            ● Normal
+                        </div>
+
+                    </div>
+
+
+                    <div class="vital-card">
+
+                        <div class="vital-label">
+                            TEMPERATURE
+                        </div>
+
+                        <div class="vital-value">
+
+                            <span id="vitalTemperature">
+                                36.7
+                            </span>
+
+                            <span class="vital-unit">
+                                °C
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="vital-status normal"
+                            id="temperatureStatus"
+                        >
+                            ● Normal
+                        </div>
+
+                    </div>
+
+
+                    <div class="vital-card">
+
+                        <div class="vital-label">
+                            BLOOD PRESSURE
+                        </div>
+
+                        <div class="vital-value">
+
+                            <span id="vitalBloodPressure">
+                                120/80
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="vital-status normal"
+                            id="bloodPressureStatus"
+                        >
+                            ● Normal
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- HEALTH SCORE -->
+
+            <section class="profile-section">
+
+                <h3 class="profile-section-title">
+                    Health Score
+                </h3>
+
+                <div class="health-score-card">
+
+                    <div class="health-score-top">
+
+                        <div class="health-score-label">
+                            Overall Patient Health
+                        </div>
+
+                        <div
+                            class="health-score-value"
+                            id="healthScore"
+                        >
+                            84%
+                        </div>
+
+                    </div>
+
+                    <div class="score-track">
+
+                        <div
+                            class="score-fill"
+                            id="healthScoreFill"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- VITAL HISTORY -->
+
+            <section class="profile-section">
+
+                <div class="history-card">
+
+                    <div class="history-header">
+
+                        <h3>
+                            Vital Signs History
+                        </h3>
+
+                        <div class="chart-filters">
+
+                            <button
+                                type="button"
+                                class="chart-filter active"
+                                data-chart="heartRate"
+                            >
+                                Heart Rate
+                            </button>
+
+                            <button
+                                type="button"
+                                class="chart-filter"
+                                data-chart="spo2"
+                            >
+                                SpO₂
+                            </button>
+
+                            <button
+                                type="button"
+                                class="chart-filter"
+                                data-chart="temperature"
+                            >
+                                Temperature
+                            </button>
+
+                            <button
+                                type="button"
+                                class="chart-filter"
+                                data-chart="bloodPressure"
+                            >
+                                BP
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="chart-wrapper">
+
+                        <canvas
+                            id="patientVitalChart"
+                        ></canvas>
+
+                    </div>
+
+
+                    <div class="history-summary">
+
+                        <div class="history-summary-item">
+
+                            <span>
+                                LATEST READING
+                            </span>
+
+                            <strong id="latestReading">
+                                --
+                            </strong>
+
+                        </div>
+
+                        <div class="history-summary-item">
+
+                            <span>
+                                AVERAGE
+                            </span>
+
+                            <strong id="averageReading">
+                                --
+                            </strong>
+
+                        </div>
+
+                        <div class="history-summary-item">
+
+                            <span>
+                                STATUS
+                            </span>
+
+                            <strong id="historyStatus">
+                                Normal
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        style="margin-top:10px;color:#64748b;font-size:9px;"
+                    >
+                        Last updated:
+                        <span id="chartLastUpdated">
+                            --
+                        </span>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ALERT -->
+
+            <section class="profile-section">
+
+                <h3 class="profile-section-title">
+                    Monitoring Status
+                </h3>
+
+                <div class="profile-alert">
+
+                    <div class="profile-alert-icon">
+                        ✓
+                    </div>
+
+                    <div class="profile-alert-content">
+
+                        <strong id="profileAlertTitle">
+                            No active health alerts
+                        </strong>
+
+                        <p id="profileAlertText">
+                            Current patient readings are within the expected
+                            monitoring range.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- NOTES -->
+
+            <section class="profile-section">
+
+                <h3 class="profile-section-title">
+                    Medical Notes
+                </h3>
+
+                <div class="info-panel">
+
+                    <p id="profileMedicalNotes">
+                        No medical notes recorded.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     TOAST
+============================================================= -->
+
+<div
+    class="patient-toast"
+    id="patientToast"
+>
+    Patient added successfully.
+</div>
+
+
+<!-- =============================================================
+     PATIENT JAVASCRIPT
+============================================================= -->
+
+<script>
+
+    /* =========================================================
+       STORAGE
+    ========================================================= */
+
+    const PATIENT_STORAGE_KEY = "healthscale_patients";
+
+
+    function getPatients() {
+
+        const stored =
+            localStorage.getItem(PATIENT_STORAGE_KEY);
+
+        if (!stored) {
+            return [];
+        }
+
+        try {
+            return JSON.parse(stored);
+        }
+
+        catch (error) {
+
+            console.error(
+                "Unable to read patient data:",
+                error
+            );
+
+            return [];
+
+        }
+
+    }
+
+
+    function savePatients(patients) {
+
+        localStorage.setItem(
+            PATIENT_STORAGE_KEY,
+            JSON.stringify(patients)
+        );
+
+    }
+
+
+    /* =========================================================
+       PATIENT ID
+    ========================================================= */
+
+    function generatePatientId() {
+
+        const patients = getPatients();
+
+        const year =
+            new Date().getFullYear();
+
+        let maxNumber = 0;
+
+        patients.forEach(function(patient) {
+
+            if (!patient.patient_id) {
+                return;
+            }
+
+            const match =
+                patient.patient_id.match(
+                    /^PAT-\d{4}-(\d+)$/
+                );
+
+            if (match) {
+
+                const number =
+                    parseInt(match[1], 10);
+
+                if (number > maxNumber) {
+                    maxNumber = number;
+                }
+
+            }
+
+        });
+
+        return (
+            "PAT-" +
+            year +
+            "-" +
+            String(maxNumber + 1).padStart(4, "0")
+        );
+
+    }
+
+
+    /* =========================================================
+       ESCAPING
+    ========================================================= */
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+        return String(value)
+
+            .replace(/&/g, "&amp;")
+
+            .replace(/</g, "&lt;")
+
+            .replace(/>/g, "&gt;")
+
+            .replace(/"/g, "&quot;")
+
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    function escapeAttribute(value) {
+
+        return String(value)
+            .replace(/\\/g, "\\\\")
+            .replace(/'/g, "\\'");
+
+    }
+
+
+    /* =========================================================
+       CONDITION
+    ========================================================= */
+
+    function getConditionClass(condition) {
+
+        if (!condition) {
+            return "status-stable";
+        }
+
+        const normalized =
+            condition.toLowerCase();
+
+        if (
+            normalized.includes("critical") ||
+            normalized.includes("emergency")
+        ) {
+            return "status-critical";
+        }
+
+        if (
+            normalized.includes("attention") ||
+            normalized.includes("warning")
+        ) {
+            return "status-warning";
+        }
+
+        return "status-stable";
+
+    }
+
+
+    /* =========================================================
+       RENDER PATIENTS
+    ========================================================= */
+
+    function renderPatients() {
+
+        const patients =
+            getPatients();
+
+        const tableBody =
+            document.getElementById(
+                "patientsTableBody"
+            );
+
+        if (!tableBody) {
+            return;
+        }
+
+
+        if (patients.length === 0) {
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        style="
+                            text-align:center;
+                            padding:50px 20px;
+                        "
+                    >
+
+                        <div
+                            style="
+                                color:#64748b;
+                                font-size:13px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    font-size:38px;
+                                    margin-bottom:10px;
+                                "
+                            >
+                                ♙
+                            </div>
+
+                            <strong
+                                style="
+                                    color:#cbd5e1;
+                                "
+                            >
+                                No patients registered
+                            </strong>
+
+                            <div
+                                style="
+                                    margin-top:7px;
+                                    font-size:11px;
+                                "
+                            >
+                                Click "Add Patient" to register
+                                a new patient.
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            updatePatientStatistics(
+                patients
+            );
+
+            return;
+
+        }
+
+
+        tableBody.innerHTML =
+
+            patients.map(function(patient) {
+
+                const conditionClass =
+                    getConditionClass(
+                        patient.condition
+                    );
+
+                return `
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                ${escapeHtml(
+                                    patient.patient_id
+                                )}
+                            </strong>
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${escapeHtml(
+                                    patient.name
+                                )}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                patient.age
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                patient.gender
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                patient.phone
+                            )}
+                        </td>
+
+                        <td>
+
+                            <span
+                                class="
+                                    status-badge
+                                    ${conditionClass}
+                                "
+                            >
+                                ${escapeHtml(
+                                    patient.condition
+                                )}
+                            </span>
+
+                        </td>
+
+                        <td>
+                            ${formatPatientDate(
+                                patient.created_at
+                            )}
+                        </td>
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="view-patient-btn"
+                                onclick="
+                                    viewPatient(
+                                        '${escapeAttribute(
+                                            patient.patient_id
+                                        )}'
+                                    )
+                                "
+                            >
+                                View
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }).join("");
+
+
+        updatePatientStatistics(
+            patients
+        );
+
+    }
+
+
+    /* =========================================================
+       STATISTICS
+    ========================================================= */
+
+    function updatePatientStatistics(
+        patients
+    ) {
+
+        const total =
+            patients.length;
+
+        const stable =
+            patients.filter(function(patient) {
+
+                return (
+                    getConditionClass(
+                        patient.condition
+                    ) === "status-stable"
+                );
+
+            }).length;
+
+
+        const attention =
+            patients.filter(function(patient) {
+
+                return (
+                    getConditionClass(
+                        patient.condition
+                    ) === "status-warning"
+                );
+
+            }).length;
+
+
+        const critical =
+            patients.filter(function(patient) {
+
+                return (
+                    getConditionClass(
+                        patient.condition
+                    ) === "status-critical"
+                );
+
+            }).length;
+
+
+        document.getElementById(
+            "totalPatients"
+        ).textContent = total;
+
+
+        document.getElementById(
+            "stablePatients"
+        ).textContent = stable;
+
+
+        document.getElementById(
+            "attentionPatients"
+        ).textContent = attention;
+
+
+        document.getElementById(
+            "criticalPatients"
+        ).textContent = critical;
+
+    }
+
+
+    /* =========================================================
+       DATE
+    ========================================================= */
+
+    function formatPatientDate(
+        dateValue
+    ) {
+
+        if (!dateValue) {
+            return "--";
+        }
+
+        try {
+
+            const date =
+                new Date(dateValue);
+
+            return date.toLocaleDateString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
+            );
+
+        }
+
+        catch (error) {
+            return "--";
+        }
+
+    }
+
+
+    /* =========================================================
+       OPEN ADD PATIENT
+    ========================================================= */
+
+    function openPatientModal() {
+
+        const modal =
+            document.getElementById(
+                "patientModal"
+            );
+
+        const drawer =
+            document.getElementById(
+                "patientDrawer"
+            );
+
+        resetPatientForm();
+
+        modal.classList.add("open");
+
+        requestAnimationFrame(function() {
+            drawer.classList.add("open");
+        });
+
+        document.body.classList.add(
+            "patient-modal-open"
+        );
+
+    }
+
+
+    /* =========================================================
+       CLOSE ADD PATIENT
+    ========================================================= */
+
+    function closePatientModal() {
+
+        const modal =
+            document.getElementById(
+                "patientModal"
+            );
+
+        const drawer =
+            document.getElementById(
+                "patientDrawer"
+            );
+
+        drawer.classList.remove("open");
+
+        setTimeout(function() {
+
+            modal.classList.remove("open");
+
+        }, 350);
+
+        document.body.classList.remove(
+            "patient-modal-open"
+        );
+
+    }
+
+
+    /* =========================================================
+       RESET FORM
+    ========================================================= */
+
+    function resetPatientForm() {
+
+        const form =
+            document.getElementById(
+                "patientForm"
+            );
+
+        if (!form) {
+            return;
+        }
+
+        form.reset();
+
+        clearFormErrors();
+
+        const patientId =
+            document.getElementById(
+                "patientId"
+            );
+
+        if (patientId) {
+
+            patientId.value =
+                generatePatientId();
+
+        }
+
+
+        const conditionPreview =
+            document.getElementById(
+                "conditionPreview"
+            );
+
+        const conditionText =
+            document.getElementById(
+                "conditionPreviewText"
+            );
+
+        if (conditionPreview) {
+
+            conditionPreview.className =
+                "condition-preview stable";
+
+        }
+
+        if (conditionText) {
+
+            conditionText.textContent =
+                "Patient currently appears stable.";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       ADD PATIENT
+    ========================================================= */
+
+    function addPatient(formData) {
+
+        const patients =
+            getPatients();
+
+
+        const patientId =
+            generatePatientId();
+
+
+        const patient = {
+
+            patient_id:
+                patientId,
+
+            name:
+                formData.get("name")?.trim() || "",
+
+            date_of_birth:
+                formData.get(
+                    "date_of_birth"
+                ) || "",
+
+            age:
+                formData.get("age") || "",
+
+            gender:
+                formData.get("gender") || "",
+
+            blood_group:
+                formData.get(
+                    "blood_group"
+                ) || "",
+
+            phone:
+                formData.get("phone")?.trim() || "",
+
+            email:
+                formData.get("email")?.trim() || "",
+
+            address:
+                formData.get("address")?.trim() || "",
+
+            emergency_contact:
+                formData.get(
+                    "emergency_contact"
+                )?.trim() || "",
+
+            condition:
+                formData.get("condition") ||
+                "Stable",
+
+            allergies:
+                formData.get("allergies")?.trim() ||
+                "",
+
+            medications:
+                formData.get("medications")?.trim() ||
+                "",
+
+            medical_notes:
+                formData.get(
+                    "medical_notes"
+                )?.trim() || "",
+
+            created_at:
+                new Date().toISOString()
+
+        };
+
+
+        patients.push(patient);
+
+        savePatients(patients);
+
+        return patient;
+
+    }
+
+
+    /* =========================================================
+       FORM VALIDATION
+    ========================================================= */
+
+    function clearFormErrors() {
+
+        document
+            .querySelectorAll(
+                "#patientForm .form-group"
+            )
+            .forEach(function(group) {
+
+                group.classList.remove(
+                    "invalid"
+                );
+
+            });
+
+    }
+
+
+    function markInvalid(
+        fieldName
+    ) {
+
+        const group =
+            document.querySelector(
+                '[data-field="' +
+                fieldName +
+                '"]'
+            );
+
+        if (group) {
+
+            group.classList.add(
+                "invalid"
+            );
+
+        }
+
+    }
+
+
+    function validatePatientForm() {
+
+        clearFormErrors();
+
+        let valid = true;
+
+
+        const name =
+            document.getElementById(
+                "patientName"
+            ).value.trim();
+
+
+        const age =
+            document.getElementById(
+                "patientAge"
+            ).value;
+
+
+        const gender =
+            document.getElementById(
+                "patientGender"
+            ).value;
+
+
+        const phone =
+            document.getElementById(
+                "patientPhone"
+            ).value.trim();
+
+
+        if (name.length < 2) {
+
+            markInvalid("name");
+
+            valid = false;
+
+        }
+
+
+        if (
+            age === "" ||
+            Number(age) < 0 ||
+            Number(age) > 120
+        ) {
+
+            markInvalid("age");
+
+            valid = false;
+
+        }
+
+
+        if (!gender) {
+
+            markInvalid("gender");
+
+            valid = false;
+
+        }
+
+
+        const phoneDigits =
+            phone.replace(
+                /\D/g,
+                ""
+            );
+
+
+        if (
+            phoneDigits.length < 10 ||
+            phoneDigits.length > 15
+        ) {
+
+            markInvalid("phone");
+
+            valid = false;
+
+        }
+
+
+        return valid;
+
+    }
+
+
+    /* =========================================================
+       DOB -> AGE
+    ========================================================= */
+
+    function calculateAgeFromDob() {
+
+        const dobInput =
+            document.getElementById(
+                "patientDob"
+            );
+
+        const ageInput =
+            document.getElementById(
+                "patientAge"
+            );
+
+        if (
+            !dobInput ||
+            !ageInput ||
+            !dobInput.value
+        ) {
+            return;
+        }
+
+
+        const dob =
+            new Date(
+                dobInput.value
+            );
+
+
+        const today =
+            new Date();
+
+
+        let age =
+            today.getFullYear() -
+            dob.getFullYear();
+
+
+        const monthDifference =
+            today.getMonth() -
+            dob.getMonth();
+
+
+        if (
+            monthDifference < 0 ||
+            (
+                monthDifference === 0 &&
+                today.getDate() < dob.getDate()
+            )
+        ) {
+
+            age--;
+
+        }
+
+
+        if (
+            age >= 0 &&
+            age <= 120
+        ) {
+
+            ageInput.value =
+                age;
+
+            document
+                .querySelector(
+                    '[data-field="age"]'
+                )
+                ?.classList.remove(
+                    "invalid"
+                );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       CONDITION PREVIEW
+    ========================================================= */
+
+    function updateConditionPreview() {
+
+        const select =
+            document.getElementById(
+                "patientCondition"
+            );
+
+        const preview =
+            document.getElementById(
+                "conditionPreview"
+            );
+
+        const text =
+            document.getElementById(
+                "conditionPreviewText"
+            );
+
+
+        if (
+            !select ||
+            !preview ||
+            !text
+        ) {
+            return;
+        }
+
+
+        const condition =
+            select.value;
+
+
+        preview.className =
+            "condition-preview";
+
+
+        if (condition === "Stable") {
+
+            preview.classList.add(
+                "stable"
+            );
+
+            text.textContent =
+                "Patient currently appears stable.";
+
+        }
+
+        else if (
+            condition ===
+            "Needs Attention"
+        ) {
+
+            preview.classList.add(
+                "attention"
+            );
+
+            text.textContent =
+                "Patient requires closer monitoring.";
+
+        }
+
+        else {
+
+            preview.classList.add(
+                "critical"
+            );
+
+            text.textContent =
+                "Immediate clinical attention may be required.";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+
+    function showPatientToast(
+        message
+    ) {
+
+        const toast =
+            document.getElementById(
+                "patientToast"
+            );
+
+        if (!toast) {
+            return;
+        }
+
+        toast.textContent =
+            message;
+
+        toast.classList.add(
+            "show"
+        );
+
+
+        setTimeout(function() {
+
+            toast.classList.remove(
+                "show"
+            );
+
+        }, 3500);
+
+    }
+
+
+    /* =========================================================
+       VIEW PATIENT / HEALTH PROFILE
+    ========================================================= */
+
+    let currentPatient = null;
+
+    let patientVitalChart = null;
+
+
+    function viewPatient(
+        patientId
+    ) {
+
+        const patients =
+            getPatients();
+
+
+        const patient =
+            patients.find(function(item) {
+
+                return (
+                    item.patient_id ===
+                    patientId
+                );
+
+            });
+
+
+        if (!patient) {
+
+            alert(
+                "Patient information could not be found."
+            );
+
+            return;
+
+        }
+
+
+        currentPatient =
+            patient;
+
+
+        populatePatientProfile(
+            patient
+        );
+
+
+        openHealthProfile();
+
+    }
+
+
+    /* =========================================================
+       PROFILE DATA
+    ========================================================= */
+
+    function populatePatientProfile(
+        patient
+    ) {
+
+        const profileName =
+            document.getElementById(
+                "profileName"
+            );
+
+
+        profileName.textContent =
+            patient.name || "Patient";
+
+
+        document.getElementById(
+            "profileAvatar"
+        ).textContent =
+            getInitials(
+                patient.name
+            );
+
+
+        document.getElementById(
+            "profilePatientId"
+        ).textContent =
+            patient.patient_id || "--";
+
+
+        document.getElementById(
+            "profileAge"
+        ).textContent =
+            patient.age || "--";
+
+
+        document.getElementById(
+            "profileAgeMeta"
+        ).textContent =
+            patient.age || "--";
+
+
+        document.getElementById(
+            "profileGender"
+        ).textContent =
+            patient.gender || "--";
+
+
+        document.getElementById(
+            "profileBlood"
+        ).textContent =
+            patient.blood_group ||
+            "--";
+
+
+        document.getElementById(
+            "profilePhone"
+        ).textContent =
+            patient.phone ||
+            "--";
+
+
+        document.getElementById(
+            "profileEmergency"
+        ).textContent =
+            patient.emergency_contact ||
+            "--";
+
+
+        document.getElementById(
+            "profileEmail"
+        ).textContent =
+            patient.email ||
+            "--";
+
+
+        document.getElementById(
+            "profileAllergies"
+        ).textContent =
+            patient.allergies ||
+            "None recorded";
+
+
+        document.getElementById(
+            "profileMedications"
+        ).textContent =
+            patient.medications ||
+            "None recorded";
+
+
+        document.getElementById(
+            "profileRegistered"
+        ).textContent =
+            formatPatientDate(
+                patient.created_at
+            );
+
+
+        document.getElementById(
+            "profileMedicalNotes"
+        ).textContent =
+            patient.medical_notes ||
+            "No medical notes recorded.";
+
+
+        const conditionElement =
+            document.getElementById(
+                "profileCondition"
+            );
+
+
+        conditionElement.className =
+            "status-badge " +
+            getConditionClass(
+                patient.condition
+            );
+
+
+        conditionElement.textContent =
+            patient.condition ||
+            "Stable";
+
+
+        updateVitals(
+            patient
+        );
+
+    }
+
+
+    /* =========================================================
+       INITIAL VITALS
+    ========================================================= */
+
+    function updateVitals(
+        patient
+    ) {
+
+        /*
+         * Demo vital readings.
+         * Later these values can come from
+         * AWS IoT / DynamoDB / backend APIs.
+         */
+
+        let heartRate = 72;
+
+        let spo2 = 98;
+
+        let temperature = 36.7;
+
+        let bloodPressure =
+            "120/80";
+
+
+        if (
+            patient.condition ===
+            "Needs Attention"
+        ) {
+
+            heartRate = 91;
+            spo2 = 95;
+            temperature = 37.4;
+            bloodPressure = "138/88";
+
+        }
+
+
+        if (
+            patient.condition ===
+            "Critical"
+        ) {
+
+            heartRate = 112;
+            spo2 = 89;
+            temperature = 38.6;
+            bloodPressure = "160/100";
+
+        }
+
+
+        document.getElementById(
+            "vitalHeartRate"
+        ).textContent =
+            heartRate;
+
+
+        document.getElementById(
+            "vitalSpo2"
+        ).textContent =
+            spo2;
+
+
+        document.getElementById(
+            "vitalTemperature"
+        ).textContent =
+            temperature;
+
+
+        document.getElementById(
+            "vitalBloodPressure"
+        ).textContent =
+            bloodPressure;
+
+
+        updateVitalStatus(
+            "heartRateStatus",
+            heartRate >= 60 &&
+            heartRate <= 100
+        );
+
+
+        updateVitalStatus(
+            "spo2Status",
+            spo2 >= 95
+        );
+
+
+        updateVitalStatus(
+            "temperatureStatus",
+            temperature >= 36.1 &&
+            temperature <= 37.5
+        );
+
+
+        const bpNormal =
+            bloodPressure === "120/80";
+
+
+        updateVitalStatus(
+            "bloodPressureStatus",
+            bpNormal
+        );
+
+
+        let score = 84;
+
+
+        if (
+            patient.condition ===
+            "Needs Attention"
+        ) {
+
+            score = 68;
+
+        }
+
+
+        if (
+            patient.condition ===
+            "Critical"
+        ) {
+
+            score = 39;
+
+        }
+
+
+        document.getElementById(
+            "healthScore"
+        ).textContent =
+            score + "%";
+
+
+        document.getElementById(
+            "healthScoreFill"
+        ).style.width =
+            score + "%";
+
+
+        const scoreElement =
+            document.getElementById(
+                "healthScore"
+            );
+
+
+        if (score >= 75) {
+
+            scoreElement.style.color =
+                "#22c55e";
+
+        }
+
+        else if (score >= 50) {
+
+            scoreElement.style.color =
+                "#f59e0b";
+
+        }
+
+        else {
+
+            scoreElement.style.color =
+                "#ef4444";
+
+        }
+
+
+        updateProfileAlert(
+            patient
+        );
+
+    }
+
+
+    function updateVitalStatus(
+        elementId,
+        normal
+    ) {
+
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+        if (!element) {
+            return;
+        }
+
+
+        if (normal) {
+
+            element.className =
+                "vital-status normal";
+
+            element.textContent =
+                "● Normal";
+
+        }
+
+        else {
+
+            element.className =
+                "vital-status attention";
+
+            element.textContent =
+                "● Attention";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       PROFILE ALERT
+    ========================================================= */
+
+    function updateProfileAlert(
+        patient
+    ) {
+
+        const title =
+            document.getElementById(
+                "profileAlertTitle"
+            );
+
+        const text =
+            document.getElementById(
+                "profileAlertText"
+            );
+
+
+        if (
+            patient.condition ===
+            "Critical"
+        ) {
+
+            title.textContent =
+                "Critical health condition";
+
+
+            text.textContent =
+                "Patient requires immediate attention and continuous monitoring.";
+
+            return;
+
+        }
+
+
+        if (
+            patient.condition ===
+            "Needs Attention"
+        ) {
+
+            title.textContent =
+                "Increased monitoring required";
+
+
+            text.textContent =
+                "Some readings may require closer observation.";
+
+            return;
+
+        }
+
+
+        title.textContent =
+            "No active health alerts";
+
+
+        text.textContent =
+            "Current patient readings are within the expected monitoring range.";
+
+    }
+
+
+    function getInitials(
+        name
+    ) {
+
+        if (!name) {
+            return "P";
+        }
+
+
+        return name
+            .split(" ")
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(function(part) {
+                return part.charAt(0);
+            })
+            .join("")
+            .toUpperCase();
+
+    }
+
+
+    /* =========================================================
+       OPEN PROFILE
+    ========================================================= */
+
+    function openHealthProfile() {
+
+        const modal =
+            document.getElementById(
+                "healthProfileModal"
+            );
+
+        const drawer =
+            document.getElementById(
+                "healthProfileDrawer"
+            );
+
+
+        modal.classList.add("open");
+
+
+        requestAnimationFrame(function() {
+
+            drawer.classList.add(
+                "open"
+            );
+
+        });
+
+
+        document.body.classList.add(
+            "patient-modal-open"
+        );
+
+
+        setTimeout(function() {
+
+            renderVitalChart(
+                "heartRate"
+            );
+
+        }, 100);
+
+    }
+
+
+    /* =========================================================
+       CLOSE PROFILE
+    ========================================================= */
+
+    function closeHealthProfile() {
+
+        const modal =
+            document.getElementById(
+                "healthProfileModal"
+            );
+
+        const drawer =
+            document.getElementById(
+                "healthProfileDrawer"
+            );
+
+
+        drawer.classList.remove(
+            "open"
+        );
+
+
+        setTimeout(function() {
+
+            modal.classList.remove(
+                "open"
+            );
+
+        }, 350);
+
+
+        if (patientVitalChart) {
+
+            patientVitalChart.destroy();
+
+            patientVitalChart =
+                null;
+
+        }
+
+
+        document.body.classList.remove(
+            "patient-modal-open"
+        );
+
+    }
+
+
+    /* =========================================================
+       VITAL HISTORY
+    ========================================================= */
+
+    function generateVitalHistory() {
+
+        const condition =
+            currentPatient?.condition ||
+            "Stable";
+
+
+        let baseHeartRate = 72;
+
+        let baseSpo2 = 98;
+
+        let baseTemperature = 36.7;
+
+        let baseBpSystolic = 120;
+
+
+        if (
+            condition ===
+            "Needs Attention"
+        ) {
+
+            baseHeartRate = 91;
+            baseSpo2 = 95;
+            baseTemperature = 37.4;
+            baseBpSystolic = 138;
+
+        }
+
+
+        if (
+            condition ===
+            "Critical"
+        ) {
+
+            baseHeartRate = 112;
+            baseSpo2 = 89;
+            baseTemperature = 38.6;
+            baseBpSystolic = 160;
+
+        }
+
+
+        const labels = [];
+
+        const heartRate = [];
+
+        const spo2 = [];
+
+        const temperature = [];
+
+        const bloodPressure = [];
+
+
+        for (
+            let i = 11;
+            i >= 0;
+            i--
+        ) {
+
+            const date =
+                new Date();
+
+            date.setHours(
+                date.getHours() -
+                i * 2
+            );
+
+
+            labels.push(
+                date.toLocaleTimeString(
+                    "en-IN",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                )
+            );
+
+
+            /*
+             * Deterministic variation
+             * so chart doesn't jump randomly.
+             */
+
+            const variation =
+                ((11 - i) % 5) - 2;
+
+
+            heartRate.push(
+                baseHeartRate +
+                variation
+            );
+
+
+            spo2.push(
+                baseSpo2 -
+                Math.max(
+                    0,
+                    variation
+                )
+            );
+
+
+            temperature.push(
+                Number(
+                    (
+                        baseTemperature +
+                        variation * 0.08
+                    ).toFixed(1)
+                )
+            );
+
+
+            bloodPressure.push(
+                baseBpSystolic +
+                variation
+            );
+
+        }
+
+
+        return {
+
+            labels,
+            heartRate,
+            spo2,
+            temperature,
+            bloodPressure
+
+        };
+
+    }
+
+
+    /* =========================================================
+       RENDER CHART
+    ========================================================= */
+
+    function renderVitalChart(
+        metric
+    ) {
+
+        const canvas =
+            document.getElementById(
+                "patientVitalChart"
+            );
+
+
+        if (!canvas) {
+            return;
+        }
+
+
+        const history =
+            generateVitalHistory();
+
+
+        let data =
+            history.heartRate;
+
+
+        let label =
+            "Heart Rate";
+
+
+        let unit =
+            " BPM";
+
+
+        if (
+            metric ===
+            "spo2"
+        ) {
+
+            data =
+                history.spo2;
+
+            label =
+                "SpO₂";
+
+            unit =
+                " %";
+
+        }
+
+
+        else if (
+            metric ===
+            "temperature"
+        ) {
+
+            data =
+                history.temperature;
+
+            label =
+                "Temperature";
+
+            unit =
+                " °C";
+
+        }
+
+
+        else if (
+            metric ===
+            "bloodPressure"
+        ) {
+
+            data =
+                history.bloodPressure;
+
+            label =
+                "Blood Pressure";
+
+            unit =
+                " mmHg";
+
+        }
+
+
+        if (patientVitalChart) {
+
+            patientVitalChart.destroy();
+
+        }
+
+
+        patientVitalChart =
+            new Chart(
+                canvas,
+                {
+
+                    type: "line",
+
+                    data: {
+
+                        labels:
+                            history.labels,
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    label,
+
+                                data:
+                                    data,
+
+                                tension:
+                                    0.35,
+
+                                fill:
+                                    true,
+
+                                borderWidth:
+                                    2,
+
+                                pointRadius:
+                                    3,
+
+                                pointHoverRadius:
+                                    5
+
+                            }
+
+                        ]
+
+                    },
+
+
+                    options: {
+
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false,
+
+
+                        interaction: {
+
+                            intersect:
+                                false,
+
+                            mode:
+                                "index"
+
+                        },
+
+
+                        plugins: {
+
+                            legend: {
+
+                                display:
+                                    false
+
+                            },
+
+
+                            tooltip: {
+
+                                callbacks: {
+
+                                    label:
+                                        function(
+                                            context
+                                        ) {
+
+                                            return (
+                                                context.dataset
+                                                    .label +
+                                                ": " +
+                                                context.parsed.y +
+                                                unit
+                                            );
+
+                                        }
+
+                                }
+
+                            }
+
+                        },
+
+
+                        scales: {
+
+                            x: {
+
+                                grid: {
+
+                                    display:
+                                        false
+
+                                },
+
+                                ticks: {
+
+                                    color:
+                                        "#64748b",
+
+                                    font: {
+
+                                        size:
+                                            9
+
+                                    }
+
+                                }
+
+                            },
+
+
+                            y: {
+
+                                grid: {
+
+                                    color:
+                                        "rgba(148,163,184,0.08)"
+
+                                },
+
+                                ticks: {
+
+                                    color:
+                                        "#64748b",
+
+                                    font: {
+
+                                        size:
+                                            9
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+
+        updateHistorySummary(
+            data,
+            unit
+        );
+
+    }
+
+
+    /* =========================================================
+       HISTORY SUMMARY
+    ========================================================= */
+
+    function updateHistorySummary(
+        data,
+        unit
+    ) {
+
+        if (!data || !data.length) {
+            return;
+        }
+
+
+        const latest =
+            data[data.length - 1];
+
+
+        const average =
+            data.reduce(
+                function(sum, value) {
+
+                    return sum + value;
+
+                },
+                0
+            ) / data.length;
+
+
+        document.getElementById(
+            "latestReading"
+        ).textContent =
+            Number(latest.toFixed(1)) +
+            unit;
+
+
+        document.getElementById(
+            "averageReading"
+        ).textContent =
+            Number(average.toFixed(1)) +
+            unit;
+
+
+        document.getElementById(
+            "historyStatus"
+        ).textContent =
+            "Normal";
+
+
+        document.getElementById(
+            "chartLastUpdated"
+        ).textContent =
+            new Date().toLocaleTimeString(
+                "en-IN",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+    }
+
+
+    /* =========================================================
+       DOM READY
+    ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            console.log(
+                "HealthScale Patients page loaded"
+            );
+
+
+            renderPatients();
+
+
+            /* -----------------------------------------------
+               ADD PATIENT BUTTON
+            ------------------------------------------------ */
+
+            const addButton =
+                document.getElementById(
+                    "addPatientButton"
+                );
+
+
+            if (addButton) {
+
+                addButton.addEventListener(
+                    "click",
+                    function(event) {
+
+                        event.preventDefault();
+
+                        openPatientModal();
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               CLOSE ADD DRAWER
+            ------------------------------------------------ */
+
+            const closeButton =
+                document.getElementById(
+                    "closePatientButton"
+                );
+
+
+            if (closeButton) {
+
+                closeButton.addEventListener(
+                    "click",
+                    function() {
+
+                        closePatientModal();
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               CANCEL
+            ------------------------------------------------ */
+
+            const cancelButton =
+                document.getElementById(
+                    "cancelPatientButton"
+                );
+
+
+            if (cancelButton) {
+
+                cancelButton.addEventListener(
+                    "click",
+                    function() {
+
+                        closePatientModal();
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               ADD MODAL BACKDROP
+            ------------------------------------------------ */
+
+            const addModal =
+                document.getElementById(
+                    "patientModal"
+                );
+
+
+            if (addModal) {
+
+                addModal.addEventListener(
+                    "click",
+                    function(event) {
+
+                        if (
+                            event.target ===
+                            addModal
+                        ) {
+
+                            closePatientModal();
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               PROFILE CLOSE
+            ------------------------------------------------ */
+
+            const profileClose =
+                document.getElementById(
+                    "closeHealthProfileButton"
+                );
+
+
+            if (profileClose) {
+
+                profileClose.addEventListener(
+                    "click",
+                    function() {
+
+                        closeHealthProfile();
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               PROFILE BACKDROP
+            ------------------------------------------------ */
+
+            const profileModal =
+                document.getElementById(
+                    "healthProfileModal"
+                );
+
+
+            if (profileModal) {
+
+                profileModal.addEventListener(
+                    "click",
+                    function(event) {
+
+                        if (
+                            event.target ===
+                            profileModal
+                        ) {
+
+                            closeHealthProfile();
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               DOB
+            ------------------------------------------------ */
+
+            const dob =
+                document.getElementById(
+                    "patientDob"
+                );
+
+
+            if (dob) {
+
+                dob.addEventListener(
+                    "change",
+                    calculateAgeFromDob
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               CONDITION
+            ------------------------------------------------ */
+
+            const condition =
+                document.getElementById(
+                    "patientCondition"
+                );
+
+
+            if (condition) {
+
+                condition.addEventListener(
+                    "change",
+                    updateConditionPreview
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               REMOVE VALIDATION ERROR ON INPUT
+            ------------------------------------------------ */
+
+            document
+                .querySelectorAll(
+                    "#patientForm .form-control"
+                )
+                .forEach(function(input) {
+
+                    input.addEventListener(
+                        "input",
+                        function() {
+
+                            const group =
+                                input.closest(
+                                    ".form-group"
+                                );
+
+
+                            if (group) {
+
+                                group.classList.remove(
+                                    "invalid"
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    input.addEventListener(
+                        "change",
+                        function() {
+
+                            const group =
+                                input.closest(
+                                    ".form-group"
+                                );
+
+
+                            if (group) {
+
+                                group.classList.remove(
+                                    "invalid"
+                                );
+
+                            }
+
+                        }
+                    );
+
+                });
+
+
+            /* -----------------------------------------------
+               FORM SUBMIT
+            ------------------------------------------------ */
+
+            const form =
+                document.getElementById(
+                    "patientForm"
+                );
+
+
+            const saveButton =
+                document.getElementById(
+                    "savePatientButton"
+                );
+
+
+            if (form) {
+
+                form.addEventListener(
+                    "submit",
+                    function(event) {
+
+                        event.preventDefault();
+
+
+                        /*
+                         * IMPORTANT:
+                         * Validation happens BEFORE
+                         * patient is saved.
+                         */
+
+                        const valid =
+                            validatePatientForm();
+
+
+                        if (!valid) {
+
+                            const firstInvalid =
+                                document.querySelector(
+                                    "#patientForm .invalid .form-control"
+                                );
+
+
+                            if (
+                                firstInvalid
+                            ) {
+
+                                firstInvalid.focus();
+
+                            }
+
+
+                            return;
+
+                        }
+
+
+                        if (saveButton) {
+
+                            saveButton.classList.add(
+                                "loading"
+                            );
+
+                            saveButton.disabled =
+                                true;
+
+                        }
+
+
+                        const formData =
+                            new FormData(
+                                form
+                            );
+
+
+                        const patient =
+                            addPatient(
+                                formData
+                            );
+
+
+                        console.log(
+                            "Patient created:",
+                            patient
+                        );
+
+
+                        /*
+                         * Small realistic save delay.
+                         */
+
+                        setTimeout(
+                            function() {
+
+                                renderPatients();
+
+                                closePatientModal();
+
+
+                                if (saveButton) {
+
+                                    saveButton.classList.remove(
+                                        "loading"
+                                    );
+
+                                    saveButton.disabled =
+                                        false;
+
+                                }
+
+
+                                showPatientToast(
+                                    "Patient registered successfully! " +
+                                    patient.patient_id
+                                );
+
+
+                            },
+                            650
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               REFRESH BUTTONS
+            ------------------------------------------------ */
+
+            const refreshButton =
+                document.getElementById(
+                    "refreshPatientsButton"
+                );
+
+
+            const registryRefresh =
+                document.getElementById(
+                    "registryRefreshButton"
+                );
+
+
+            if (refreshButton) {
+
+                refreshButton.addEventListener(
+                    "click",
+                    function() {
+
+                        renderPatients();
+
+                        showPatientToast(
+                            "Patient registry refreshed."
+                        );
+
+                    }
+                );
+
+            }
+
+
+            if (registryRefresh) {
+
+                registryRefresh.addEventListener(
+                    "click",
+                    function() {
+
+                        renderPatients();
+
+                        showPatientToast(
+                            "Patient registry refreshed."
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* -----------------------------------------------
+               CHART FILTERS
+            ------------------------------------------------ */
+
+            document
+                .querySelectorAll(
+                    ".chart-filter"
+                )
+                .forEach(function(button) {
+
+                    button.addEventListener(
+                        "click",
+                        function() {
+
+                            document
+                                .querySelectorAll(
+                                    ".chart-filter"
+                                )
+                                .forEach(
+                                    function(item) {
+
+                                        item.classList.remove(
+                                            "active"
+                                        );
+
+                                    }
+                                );
+
+
+                            button.classList.add(
+                                "active"
+                            );
+
+
+                            renderVitalChart(
+                                button.dataset.chart
+                            );
+
+                        }
+                    );
+
+                });
+
+
+            /* -----------------------------------------------
+               ESCAPE KEY
+            ------------------------------------------------ */
+
+            document.addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (
+                        event.key ===
+                        "Escape"
+                    ) {
+
+                        const addModal =
+                            document.getElementById(
+                                "patientModal"
+                            );
+
+
+                        const profileModal =
+                            document.getElementById(
+                                "healthProfileModal"
+                            );
+
+
+                        if (
+                            profileModal &&
+                            profileModal.classList.contains(
+                                "open"
+                            )
+                        ) {
+
+                            closeHealthProfile();
+
+                            return;
+
+                        }
+
+
+                        if (
+                            addModal &&
+                            addModal.classList.contains(
+                                "open"
+                            )
+                        ) {
+
+                            closePatientModal();
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>
